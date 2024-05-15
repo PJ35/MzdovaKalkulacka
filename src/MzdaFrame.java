@@ -43,30 +43,44 @@ public class MzdaFrame {
         vypocitat.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int hrubaMzda = Integer.parseInt(mzda.getText());
-                int cenaAuta = auto.isSelected() ? Integer.parseInt(cena.getText()) : 0;
-                int zakladOdvodu = hrubaMzda;
-                if (auto.isSelected()) {
-                    if (emisni.isSelected()) {
-                        zakladOdvodu += cenaAuta / 100;
-                    } else if (nizkoemisni.isSelected()) {
-                        zakladOdvodu += cenaAuta * 5 / 1000;
-                    } else if (bezemisni.isSelected()) {
-                        zakladOdvodu += cenaAuta * 25 / 10000;
-                    }
+                try {
+                    int hrubaMzda = Integer.parseInt(mzda.getText());
+                    int cenaAuta = auto.isSelected() ? Integer.parseInt(cena.getText()) : 0;
+                    int zakladOdvodu = getZakladOdvodu(hrubaMzda, cenaAuta);
+                    int slevaPoplatnika = prohlaseni.isSelected() ? SLEVA_NA_POPLATNIKA : 0;
+                    int detiNaSlevu = prohlaseni.isSelected() ? Integer.parseInt(deti.getText()) : 0;
+                    int danZPrijmu = getDanZPrijmu(detiNaSlevu, zakladOdvodu, slevaPoplatnika);
+                    int socPojisteni = zakladOdvodu * 71 / 1000;
+                    int zdravPojisteni = zakladOdvodu * 45 / 1000;
+                    int cistaMzda = hrubaMzda - danZPrijmu - socPojisteni - zdravPojisteni;
+                    JOptionPane.showMessageDialog(null, "Čistá mzda: " + cistaMzda + " Kč\n\n" +
+                            "Daň z příjmu: " + danZPrijmu + " Kč\n" +
+                            "Sociální pojištění: " + socPojisteni + " Kč\n" +
+                            "Zdravotní pojištění: " + zdravPojisteni + " Kč");
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Zadejte číselné hodnoty\n" +
+                            ex.getMessage(), "Chyba", JOptionPane.ERROR_MESSAGE);
+                } catch (IllegalArgumentException ex) {
+                    JOptionPane.showMessageDialog(null, ex.getMessage(), "Chyba", JOptionPane.ERROR_MESSAGE);
                 }
-                int slevaPoplatnika = prohlaseni.isSelected() ? SLEVA_NA_POPLATNIKA : 0;
-                int detiNaSlevu = prohlaseni.isSelected() ? Integer.parseInt(deti.getText()) : 0;
-                int danZPrijmu = getDanZPrijmu(detiNaSlevu, zakladOdvodu, slevaPoplatnika);
-                int socPojisteni = zakladOdvodu * 71 / 1000;
-                int zdravPojisteni = zakladOdvodu * 45 / 1000;
-                int cistaMzda = hrubaMzda - danZPrijmu - socPojisteni - zdravPojisteni;
-                JOptionPane.showMessageDialog(null, "Čistá mzda: " + cistaMzda + " Kč\n\n" +
-                        "Daň z příjmu: " + danZPrijmu + " Kč\n" +
-                        "Sociální pojištění: " + socPojisteni + " Kč\n" +
-                        "Zdravotní pojištění: " + zdravPojisteni + " Kč");
             }
         });
+    }
+
+    private int getZakladOdvodu(int hrubaMzda, int cenaAuta) {
+        int zakladOdvodu = hrubaMzda;
+        if (auto.isSelected()) {
+            if (emisni.isSelected()) {
+                zakladOdvodu += cenaAuta / 100;
+            } else if (nizkoemisni.isSelected()) {
+                zakladOdvodu += cenaAuta * 5 / 1000;
+            } else if (bezemisni.isSelected()) {
+                zakladOdvodu += cenaAuta * 25 / 10000;
+            } else {
+                throw new IllegalArgumentException("Vyberte typ emise vozidla");
+            }
+        }
+        return zakladOdvodu;
     }
 
     private int getDanZPrijmu(int detiNaSlevu, int zakladOdvodu, int slevaPoplatnika) {
