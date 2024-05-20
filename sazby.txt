@@ -1,0 +1,5 @@
+100;50;25;710;450;1500
+
+sazba_emisni_auto;sazba_nizkoemisni_auto;sazba_bezemisni_auto;sazba_soc_pojisteni;sazba_zdrav_pojisteni;sazba_dan_z_prijmu
+
+Sazby jsou uvedeny v setinách procenta.

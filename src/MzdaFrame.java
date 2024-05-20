@@ -1,6 +1,8 @@
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Scanner;
 
 public class MzdaFrame {
     private JPanel mainPanel;
@@ -14,55 +16,51 @@ public class MzdaFrame {
     private JRadioButton bezemisni;
     private JTextField cena;
 
-    final int SLEVA_NA_POPLATNIKA = 2570;
-    final int SLEVA_NA_PRVNI_DITE = 1267;
-    final int SLEVA_NA_DRUHE_DITE = 1860;
-    final int SLEVA_NA_DALSI_DITE = 2320;
+    static int slevaNaPoplatnika = 2570;
+    static int slevaNaPrvniDite = 1267;
+    static int slevaNaDruheDite = 1860;
+    static int slevaNaDalsiDite = 2320;
+    static int sazba_emisni_auto = 100;
+    static int sazba_nizkoemisni_auto = 50;
+    static int sazba_bezemisni_auto = 25;
+    static int sazba_soc_pojisteni = 710;
+    static int sazba_zdrav_pojisteni = 450;
+    static int sazba_dan_z_prijmu = 1500;
+    final int TISICINA_PROCENTA = 10000;
 
     public MzdaFrame() {
         deti.setEnabled(false);
-        prohlaseni.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                deti.setEnabled(prohlaseni.isSelected());
-            }
-        });
+        prohlaseni.addActionListener(e -> deti.setEnabled(prohlaseni.isSelected()));
         cena.setEnabled(false);
         emisni.setEnabled(false);
         nizkoemisni.setEnabled(false);
         bezemisni.setEnabled(false);
-        auto.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cena.setEnabled(auto.isSelected());
-                emisni.setEnabled(auto.isSelected());
-                nizkoemisni.setEnabled(auto.isSelected());
-                bezemisni.setEnabled(auto.isSelected());
-            }
+        auto.addActionListener(e -> {
+            cena.setEnabled(auto.isSelected());
+            emisni.setEnabled(auto.isSelected());
+            nizkoemisni.setEnabled(auto.isSelected());
+            bezemisni.setEnabled(auto.isSelected());
         });
-        vypocitat.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    int hrubaMzda = Integer.parseInt(mzda.getText());
-                    int cenaAuta = auto.isSelected() ? Integer.parseInt(cena.getText()) : 0;
-                    int zakladOdvodu = getZakladOdvodu(hrubaMzda, cenaAuta);
-                    int slevaPoplatnika = prohlaseni.isSelected() ? SLEVA_NA_POPLATNIKA : 0;
-                    int detiNaSlevu = prohlaseni.isSelected() ? Integer.parseInt(deti.getText()) : 0;
-                    int danZPrijmu = getDanZPrijmu(detiNaSlevu, zakladOdvodu, slevaPoplatnika);
-                    int socPojisteni = zakladOdvodu * 71 / 1000;
-                    int zdravPojisteni = zakladOdvodu * 45 / 1000;
-                    int cistaMzda = hrubaMzda - danZPrijmu - socPojisteni - zdravPojisteni;
-                    JOptionPane.showMessageDialog(null, "Čistá mzda: " + cistaMzda + " Kč\n\n" +
-                            "Daň z příjmu: " + danZPrijmu + " Kč\n" +
-                            "Sociální pojištění: " + socPojisteni + " Kč\n" +
-                            "Zdravotní pojištění: " + zdravPojisteni + " Kč");
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(null, "Zadejte číselné hodnoty\n" +
-                            ex.getMessage(), "Chyba", JOptionPane.ERROR_MESSAGE);
-                } catch (IllegalArgumentException ex) {
-                    JOptionPane.showMessageDialog(null, ex.getMessage(), "Chyba", JOptionPane.ERROR_MESSAGE);
-                }
+        vypocitat.addActionListener(e -> {
+            try {
+                int hrubaMzda = Integer.parseInt(mzda.getText());
+                int cenaAuta = auto.isSelected() ? Integer.parseInt(cena.getText()) : 0;
+                int zakladOdvodu = getZakladOdvodu(hrubaMzda, cenaAuta);
+                int slevaPoplatnika = prohlaseni.isSelected() ? slevaNaPoplatnika : 0;
+                int detiNaSlevu = prohlaseni.isSelected() ? Integer.parseInt(deti.getText()) : 0;
+                int danZPrijmu = getDanZPrijmu(detiNaSlevu, zakladOdvodu, slevaPoplatnika);
+                int socPojisteni = zakladOdvodu * sazba_soc_pojisteni / TISICINA_PROCENTA;
+                int zdravPojisteni = zakladOdvodu * sazba_zdrav_pojisteni / TISICINA_PROCENTA;
+                int cistaMzda = hrubaMzda - danZPrijmu - socPojisteni - zdravPojisteni;
+                JOptionPane.showMessageDialog(null, "Čistá mzda: " + cistaMzda + " Kč\n\n" +
+                        "Daň z příjmu: " + danZPrijmu + " Kč\n" +
+                        "Sociální pojištění: " + socPojisteni + " Kč\n" +
+                        "Zdravotní pojištění: " + zdravPojisteni + " Kč");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Zadejte číselné hodnoty\n" +
+                        ex.getMessage(), "Chyba", JOptionPane.ERROR_MESSAGE);
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(null, ex.getMessage(), "Chyba", JOptionPane.ERROR_MESSAGE);
             }
         });
     }
@@ -71,13 +69,11 @@ public class MzdaFrame {
         int zakladOdvodu = hrubaMzda;
         if (auto.isSelected()) {
             if (emisni.isSelected()) {
-                zakladOdvodu += cenaAuta / 100;
+                zakladOdvodu += cenaAuta * sazba_emisni_auto / TISICINA_PROCENTA;
             } else if (nizkoemisni.isSelected()) {
-                zakladOdvodu += cenaAuta * 5 / 1000;
+                zakladOdvodu += cenaAuta * sazba_nizkoemisni_auto / TISICINA_PROCENTA;
             } else if (bezemisni.isSelected()) {
-                zakladOdvodu += cenaAuta * 25 / 10000;
-            } else {
-                throw new IllegalArgumentException("Vyberte typ emise vozidla");
+                zakladOdvodu += cenaAuta * sazba_bezemisni_auto / TISICINA_PROCENTA;
             }
         }
         return zakladOdvodu;
@@ -85,18 +81,18 @@ public class MzdaFrame {
 
     private int getDanZPrijmu(int detiNaSlevu, int zakladOdvodu, int slevaPoplatnika) {
         int slevaNaDeti = 0;
-        if (detiNaSlevu >0) {
-            slevaNaDeti += SLEVA_NA_PRVNI_DITE;
+        if (detiNaSlevu > 0) {
+            slevaNaDeti += slevaNaPrvniDite;
             if (detiNaSlevu > 1) {
-                slevaNaDeti += SLEVA_NA_DRUHE_DITE;
+                slevaNaDeti += slevaNaDruheDite;
                 int pocitadlo = 2;
                 while (detiNaSlevu > pocitadlo) {
-                    slevaNaDeti += SLEVA_NA_DALSI_DITE;
+                    slevaNaDeti += slevaNaDalsiDite;
                     pocitadlo++;
                 }
             }
         }
-        return zakladOdvodu * 15 / 100 - slevaPoplatnika - slevaNaDeti;
+        return zakladOdvodu * sazba_dan_z_prijmu / TISICINA_PROCENTA - slevaPoplatnika - slevaNaDeti;
     }
 
     public static void main(String[] args) {
@@ -106,5 +102,35 @@ public class MzdaFrame {
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+        nactiSlevy();
+        nactiSazby();
+    }
+
+    private static void nactiSlevy() {
+        try (Scanner sc = new Scanner(new BufferedReader(new FileReader("slevy.txt")))) {
+            String radek = sc.nextLine();
+            String[] slevy = radek.split(";");
+            slevaNaPoplatnika = Integer.parseInt(slevy[0]);
+            slevaNaPrvniDite = Integer.parseInt(slevy[1]);
+            slevaNaDruheDite = Integer.parseInt(slevy[2]);
+            slevaNaDalsiDite = Integer.parseInt(slevy[3]);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Nepodařilo se načíst slevy ze souboru slevy.txt");
+        }
+    }
+
+    private static void nactiSazby() {
+        try (Scanner sc = new Scanner(new BufferedReader(new FileReader("sazby.txt")))) {
+            String radek = sc.nextLine();
+            String[] sazby = radek.split(";");
+            sazba_emisni_auto = Integer.parseInt(sazby[0]);
+            sazba_nizkoemisni_auto = Integer.parseInt(sazby[1]);
+            sazba_bezemisni_auto = Integer.parseInt(sazby[2]);
+            sazba_soc_pojisteni = Integer.parseInt(sazby[3]);
+            sazba_zdrav_pojisteni = Integer.parseInt(sazby[4]);
+            sazba_dan_z_prijmu = Integer.parseInt(sazby[5]);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Nepodařilo se načíst sazby ze souboru sazby.txt");
+        }
     }
 }
