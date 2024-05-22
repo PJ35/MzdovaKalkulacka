@@ -16,16 +16,16 @@ public class MzdaFrame {
     private JRadioButton bezemisni;
     private JTextField cena;
 
-    static int slevaNaPoplatnika = 2570;
-    static int slevaNaPrvniDite = 1267;
-    static int slevaNaDruheDite = 1860;
-    static int slevaNaDalsiDite = 2320;
-    static int sazba_emisni_auto = 100;
-    static int sazba_nizkoemisni_auto = 50;
-    static int sazba_bezemisni_auto = 25;
-    static int sazba_soc_pojisteni = 710;
-    static int sazba_zdrav_pojisteni = 450;
-    static int sazba_dan_z_prijmu = 1500;
+    static int slevaNaPoplatnika;
+    static int slevaNaPrvniDite;
+    static int slevaNaDruheDite;
+    static int slevaNaDalsiDite;
+    static int sazba_emisni_auto;
+    static int sazba_nizkoemisni_auto;
+    static int sazba_bezemisni_auto;
+    static int sazba_soc_pojisteni;
+    static int sazba_zdrav_pojisteni;
+    static int sazba_dan_z_prijmu;
     final int TISICINA_PROCENTA = 10000;
 
     public MzdaFrame() {
@@ -74,6 +74,8 @@ public class MzdaFrame {
                 zakladOdvodu += cenaAuta * sazba_nizkoemisni_auto / TISICINA_PROCENTA;
             } else if (bezemisni.isSelected()) {
                 zakladOdvodu += cenaAuta * sazba_bezemisni_auto / TISICINA_PROCENTA;
+            } else {
+                throw new IllegalArgumentException("Vyberte typ automobilu");
             }
         }
         return zakladOdvodu;
