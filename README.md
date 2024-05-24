@@ -14,7 +14,7 @@ Grafické uživatelské rozhraní je vytvořené pomocí knihovny **Swing**.
 
 Aplikace z hrubé mzdy počítá čistou mzdu a zobrazuje odvody na sociální a zdravotní pojištění a daň z příjmu, popřípadě daňový bonus jako zápornou daň, které souvisí s danou mzdou.
 
-Určená je pro lidi, kteří si chtějí vypočítat svou čistou mzdu a zjistit, kam se odvádí peníze z jejich hrubé mzdy.
+Určená je pro lidi, kteří si chtějí vypočítat svoji čistou mzdu a zjistit, kolik se kam odvádí peněz z jejich hrubé mzdy.
 
 Dokáže do výpočtů zahrnout také služební auto, pokud jej má zaměstnanec pro soukromé účely, a od daně odečíst nezdanitelnou část a slevu na dani za děti v opatrovnictví.
 
