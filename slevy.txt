@@ -1,3 +1,5 @@
 2570;1267;1860;2320
 
 slevaNaPoplatnika;slevaNaPrvniDite;slevaNaDruheDite;slevaNaDalsiDite
+
+Slevy jsou uvedeny v Kč.
